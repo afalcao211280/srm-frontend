@@ -12,6 +12,8 @@ type Opcoes = {
   status?: string;
   dataInicial?: string;
   dataFinal?: string;
+  tipoRecebivel?: string;
+  cedenteId?: string;
 };
 
 export function useTransacoes(opcoes: Opcoes) {
@@ -25,7 +27,9 @@ export function useTransacoes(opcoes: Opcoes) {
       if (opcoes.status) busca.set("status", opcoes.status);
       if (opcoes.dataInicial) busca.set("data_inicial", opcoes.dataInicial);
       if (opcoes.dataFinal) busca.set("data_final", opcoes.dataFinal);
-      const resp = await api.get<unknown>(`/api/v1/transacoes?${busca.toString()}`);
+      if (opcoes.tipoRecebivel) busca.set("tipo_recebivel", opcoes.tipoRecebivel);
+      if (opcoes.cedenteId) busca.set("cedente_id", opcoes.cedenteId);
+      const resp = await api.get<unknown>(`/api/v1/relatorios/extrato-liquidacao?${busca.toString()}`);
       return EsquemaPaginada.parse(resp);
     },
   });
