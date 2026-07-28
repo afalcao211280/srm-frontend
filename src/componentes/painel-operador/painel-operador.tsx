@@ -2,8 +2,16 @@
 
 import { useState } from "react";
 
+import { api } from "@/lib/api";
+import { EsquemaRespostaTransacao, EsquemaSimulacao } from "@/lib/esquemas";
 import { useSimulacao } from "@/lib/ganchos/use-simulacao";
 import { useTiposRecebivel } from "@/lib/ganchos/use-tipos-recebivel";
+
+type Confirmacao =
+  | { tipo: "ocioso" }
+  | { tipo: "enviando" }
+  | { tipo: "sucesso"; id: string }
+  | { tipo: "erro"; mensagem: string };
 
 export function PainelOperador() {
   const tipos = useTiposRecebivel();
@@ -18,6 +26,19 @@ export function PainelOperador() {
   const habilitado =
     form.valor_face !== "" && form.data_vencimento !== "" && form.tipo_recebivel !== "";
   const estado = useSimulacao({ entrada: form, habilitado });
+  const [confirmacao, setConfirmacao] = useState<Confirmacao>({ tipo: "ocioso" });
+
+  async function confirmarOperacao() {
+    setConfirmacao({ tipo: "enviando" });
+    try {
+      const parseada = EsquemaSimulacao.parse(form);
+      const resp = await api.post<unknown>("/api/v1/transacoes", parseada);
+      const transacao = EsquemaRespostaTransacao.parse(resp);
+      setConfirmacao({ tipo: "sucesso", id: transacao.id });
+    } catch (e) {
+      setConfirmacao({ tipo: "erro", mensagem: e instanceof Error ? e.message : "Erro" });
+    }
+  }
 
   return (
     <section className="mb-8 rounded-lg border bg-white p-6 shadow-sm">
@@ -78,20 +99,40 @@ export function PainelOperador() {
         {estado.tipo === "carregando" && <span>Calculando…</span>}
         {estado.tipo === "erro" && <span className="text-red-600">{estado.mensagem}</span>}
         {estado.tipo === "sucesso" && (
-          <dl className="grid grid-cols-3 gap-4">
-            <div>
-              <dt className="text-sm text-slate-500">Valor presente</dt>
-              <dd className="text-lg font-mono">{estado.dados.valor_presente}</dd>
+          <>
+            <dl className="grid grid-cols-3 gap-4">
+              <div>
+                <dt className="text-sm text-slate-500">Valor presente</dt>
+                <dd className="text-lg font-mono">{estado.dados.valor_presente}</dd>
+              </div>
+              <div>
+                <dt className="text-sm text-slate-500">Deságio</dt>
+                <dd className="text-lg font-mono">{estado.dados.desagio}</dd>
+              </div>
+              <div>
+                <dt className="text-sm text-slate-500">Valor líquido ({estado.dados.moeda_pagamento})</dt>
+                <dd className="text-lg font-mono">{estado.dados.valor_liquido}</dd>
+              </div>
+            </dl>
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={confirmarOperacao}
+                disabled={confirmacao.tipo === "enviando"}
+                className="rounded border px-3 py-2 disabled:opacity-50"
+              >
+                {confirmacao.tipo === "enviando" ? "Confirmando…" : "Confirmar operação"}
+              </button>
+              {confirmacao.tipo === "sucesso" && (
+                <p className="mt-2 text-green-700">
+                  Transação confirmada. ID: <span className="font-mono">{confirmacao.id}</span>
+                </p>
+              )}
+              {confirmacao.tipo === "erro" && (
+                <p className="mt-2 text-red-600">{confirmacao.mensagem}</p>
+              )}
             </div>
-            <div>
-              <dt className="text-sm text-slate-500">Deságio</dt>
-              <dd className="text-lg font-mono">{estado.dados.desagio}</dd>
-            </div>
-            <div>
-              <dt className="text-sm text-slate-500">Valor líquido ({estado.dados.moeda_pagamento})</dt>
-              <dd className="text-lg font-mono">{estado.dados.valor_liquido}</dd>
-            </div>
-          </dl>
+          </>
         )}
       </div>
     </section>
