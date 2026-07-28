@@ -8,7 +8,7 @@
 | ADR-016 Proxy mesma origem | `next.config.ts` |
 | ADR-013 Next.js 16 + TS 5.9.3 | `package.json` (versões fixadas) |
 | Testes | `vitest.config.ts` + `src/componentes/painel-operador/painel-operador.test.tsx` |
-| E2E | `playwright.config.ts` (estrutura preparada) |
+| E2E | `playwright.config.ts` + `e2e/painel-operador.spec.ts` + `e2e/grid-transacoes.spec.ts` (Playwright configurado e com specs, roda contra a stack Docker Compose) |
 | CI | `.github/workflows/ci.yml` |
 | Documentação | `README.md`, `AI_USAGE.md`, este mapa |
 
