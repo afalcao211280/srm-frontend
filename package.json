@@ -9,10 +9,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "prepare": "lefthook install"
   },
   "dependencies": {
     "next": "16.2.12",
@@ -29,11 +30,16 @@
     "tailwindcss": "4.3.3",
     "@tailwindcss/postcss": "4.3.3",
     "postcss": "8.4.49",
-    "eslint": "10.8.0",
+    "eslint": "9.39.5",
     "eslint-config-next": "16.2.12",
     "vitest": "4.1.10",
+    "jsdom": "30.0.0",
+    "@vitejs/plugin-react": "6.0.4",
     "@testing-library/react": "16.3.2",
     "@testing-library/jest-dom": "6.6.3",
-    "@playwright/test": "1.62.0"
+    "@testing-library/user-event": "14.6.1",
+    "@tanstack/react-query-devtools": "5.101.4",
+    "@playwright/test": "1.62.0",
+    "lefthook": "2.1.10"
   }
 }

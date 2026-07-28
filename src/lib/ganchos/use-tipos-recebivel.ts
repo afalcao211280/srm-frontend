@@ -2,8 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { api } from "./api";
-import { EsquemaTipoRecebivel } from "./esquemas";
+import { api } from "../api";
+import { EsquemaTipoRecebivel } from "../esquemas";
 
 export function useTiposRecebivel() {
   return useQuery({

@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { z } from "zod";
 
-import { api } from "./api";
-import { EsquemaRespostaSimulacao, EsquemaSimulacao } from "./esquemas";
+import { api } from "../api";
+import { EsquemaRespostaSimulacao, EsquemaSimulacao } from "../esquemas";
 
 type Opcoes = {
-  entrada: EsquemaSimulacao;
+  entrada: z.infer<typeof EsquemaSimulacao>;
   habilitado: boolean;
   atrasoMs?: number;
 };
@@ -14,7 +15,7 @@ type Opcoes = {
 type Estado =
   | { tipo: "ocioso" }
   | { tipo: "carregando" }
-  | { tipo: "sucesso"; dados: import("./esquemas").z.infer<typeof EsquemaRespostaSimulacao> }
+  | { tipo: "sucesso"; dados: z.infer<typeof EsquemaRespostaSimulacao> }
   | { tipo: "erro"; mensagem: string };
 
 export function useSimulacao({ entrada, habilitado, atrasoMs = 300 }: Opcoes) {
@@ -23,7 +24,8 @@ export function useSimulacao({ entrada, habilitado, atrasoMs = 300 }: Opcoes) {
 
   useEffect(() => {
     if (!habilitado) {
-      setEstado({ tipo: "ocioso" });
+      // Deferido para fora do corpo síncrono do efeito (react-hooks/set-state-in-effect).
+      queueMicrotask(() => setEstado({ tipo: "ocioso" }));
       return;
     }
     const minhaRequisicao = ++requisicaoRef.current;
