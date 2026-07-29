@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cor-primaria: #1e40af;
+  --cor-fundo: #f8fafc;
+  --cor-texto: #0f172a;
+}
+
+body {
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
