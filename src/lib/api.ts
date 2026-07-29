@@ -4,12 +4,28 @@
 
 export type Resposta<T> = { dados: T; correlation_id?: string };
 
+// crypto.randomUUID só existe em contexto seguro (HTTPS ou "localhost") —
+// em qualquer outro host servido por HTTP puro (ex.: acesso direto pelo
+// nome do serviço numa rede Docker) o browser nem expõe a função, e a
+// chamada quebraria toda requisição. Não é valor criptográfico, só um
+// correlation ID de rastreamento — Math.random é suficiente como fallback.
+function gerarCorrelationId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 async function chamar<T>(caminho: string, init: RequestInit = {}): Promise<T> {
   const resp = await fetch(caminho, {
     ...init,
     headers: {
       "Content-Type": "application/json",
-      "X-Correlation-ID": crypto.randomUUID(),
+      "X-Correlation-ID": gerarCorrelationId(),
       ...(init.headers ?? {}),
     },
     cache: "no-store",
