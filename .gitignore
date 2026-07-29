@@ -43,3 +43,8 @@ next-env.d.ts
 
 # tooling de agentes de IA (não faz parte do entregável)
 .agents/
+.claude/
+
+# editores
+.idea/
+.vscode/
