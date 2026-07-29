@@ -1,0 +1,14 @@
+# Imagem separada do Dockerfile principal: os browsers do Playwright
+# exigem glibc (a imagem oficial mcr.microsoft.com/playwright já traz
+# Chromium instalado), incompatível com o alpine/musl usado no build de
+# produção. bun instalado via script oficial — Node.js já vem na imagem
+# base, mas o projeto usa bun como package manager em todo o resto.
+FROM mcr.microsoft.com/playwright:v1.62.0-noble
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends unzip && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL https://bun.sh/install | bash
+ENV PATH="/root/.bun/bin:${PATH}"
+COPY package.json bun.lock* ./
+RUN bun install --frozen-lockfile --ignore-scripts
+COPY . .
+ENTRYPOINT ["bun", "run", "test:e2e"]

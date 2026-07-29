@@ -22,4 +22,8 @@ COPY --from=builder /app/.next/static ./.next/static
 USER nonroot
 EXPOSE 3000
 ENV PORT=3000 HOSTNAME=0.0.0.0
+# Imagem distroless: sem shell/curl, então HEALTHCHECK precisa do binário
+# exato do node (o ENTRYPOINT da imagem base) e do fetch nativo do Node 22.
+HEALTHCHECK --interval=10s --retries=3 --start-period=15s \
+  CMD ["/nodejs/bin/node", "-e", "fetch('http://localhost:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
 CMD ["server.js"]
